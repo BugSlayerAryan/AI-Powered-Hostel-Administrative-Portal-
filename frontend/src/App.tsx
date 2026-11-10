@@ -57,7 +57,12 @@ function showToast(message: string, kind?: ToastKind) {
   const type = kind || (success ? "success" : "error");
   notifyToast[type](message);
 }
-const api = axios.create({ baseURL: "/api" });
+// const api = axios.create({ baseURL: "/api" });
+const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
+const api = axios.create({
+  baseURL: `${API_URL}/api`,
+});
 api.interceptors.request.use((c) => {
   const t = localStorage.getItem("token");
   if (t) c.headers.Authorization = `Bearer ${t}`;
@@ -1216,7 +1221,10 @@ function ProfileEditor({
     profileImage: user.profileImage || "",
   });
   const [preview, setPreview] = useState(
-    user.profileImage ? `/api/uploads/${user.profileImage}` : "",
+    // user.profileImage ? `/api/uploads/${user.profileImage}` : "",
+    user.profileImage
+  ? `${API_URL}/api/uploads/${user.profileImage}`
+  : ""
   );
   const [busy, setBusy] = useState(false);
   const [file, setFile] = useState<File | null>(null);
