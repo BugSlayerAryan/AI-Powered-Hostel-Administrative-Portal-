@@ -1,0 +1,5 @@
+import { Request, Response, NextFunction } from 'express'; import jwt from 'jsonwebtoken'; import { User } from '../models/index.js';
+export type AuthedRequest=Request & {user?:any};
+export async function authenticate(req:AuthedRequest,res:Response,next:NextFunction){try{const token=req.headers.authorization?.replace(/^Bearer\s+/i,'');if(!token)return res.status(401).json({message:'Authentication required'});const decoded=jwt.verify(token,process.env.JWT_SECRET!) as any;const user=await User.findById(decoded.sub);if(!user||!user.active)return res.status(401).json({message:'Session is invalid'});req.user=user;next()}catch{return res.status(401).json({message:'Session is invalid or expired'})}}
+export function allow(...roles:string[]){return (req:AuthedRequest,res:Response,next:NextFunction)=>{if(!req.user)return res.status(401).json({message:'Authentication required'});if(!roles.includes(req.user.role))return res.status(403).json({message:'Insufficient permission'});next()}}
+export function scope(req:AuthedRequest){return req.user.role==='SUPER_ADMIN'?{}:{hostel:req.user.hostel};}

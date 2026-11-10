@@ -1,0 +1,294 @@
+:root {
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --shadow-card: 0 12px 35px rgba(32, 45, 89, .07);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  min-height: 36px;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--blue) 28%, transparent);
+  outline-offset: 2px;
+}
+
+.panel,
+.stat-card,
+.special-card,
+.profile-card,
+.chat-card,
+.chat-side,
+.login-form {
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.panel {
+  overflow: hidden;
+}
+
+.content-wrap {
+  width: 100%;
+}
+
+.page-heading {
+  gap: 20px;
+}
+
+.page-heading .primary-btn {
+  white-space: nowrap;
+}
+
+.record-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.record-toolbar .searchbox {
+  flex: 1 1 220px;
+  min-width: 180px;
+}
+
+.record-filter {
+  min-width: 145px;
+}
+
+.table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
+.table-scroll table {
+  min-width: 720px;
+}
+
+.records-panel {
+  padding: clamp(14px, 2vw, 22px);
+}
+
+.records-panel .record-toolbar {
+  margin: 18px 0 14px;
+}
+
+.records-panel tbody tr {
+  transition: background .16s ease;
+}
+
+.records-panel tbody tr:hover {
+  background: var(--panel-soft);
+}
+
+.modal-backdrop {
+  padding: 18px;
+  backdrop-filter: blur(7px);
+}
+
+.modal {
+  width: min(100%, 680px);
+  max-height: min(88vh, 820px);
+  overflow-y: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(19, 28, 59, .2);
+}
+
+.modal-fields {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.modal-fields label:has(textarea) {
+  grid-column: 1 / -1;
+}
+
+.login-page {
+  min-height: 100svh;
+}
+
+@media (max-width: 1050px) {
+  .sidebar {
+    width: 220px;
+  }
+
+  .main {
+    margin-left: 220px;
+  }
+
+  .content-wrap {
+    padding: 28px 24px 44px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .sidebar {
+    position: sticky;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    padding: 14px 14px 10px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    padding: 0 6px 12px;
+  }
+
+  .side-label,
+  .sidebar-bottom {
+    display: none;
+  }
+
+  .sidebar nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .nav-item {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: max-content;
+    margin: 0;
+    padding: 0 11px;
+  }
+
+  .nav-item span {
+    flex: 0 0 auto;
+  }
+
+  .main {
+    margin-left: 0;
+  }
+
+  .topbar {
+    height: 58px;
+    padding: 0 16px;
+  }
+
+  .top-user > div:last-child {
+    display: none;
+  }
+
+  .content-wrap {
+    padding: 22px 14px 38px;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: 18px;
+  }
+
+  .page-heading h1 {
+    font-size: 21px;
+  }
+
+  .page-heading .primary-btn {
+    width: 100%;
+  }
+
+  .dashboard-grid,
+  .lower-grid,
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    gap: 10px;
+  }
+
+  .stat-card {
+    min-height: 105px;
+    padding: 13px;
+  }
+
+  .record-toolbar {
+    align-items: stretch;
+  }
+
+  .record-toolbar .searchbox,
+  .record-toolbar .record-filter,
+  .record-toolbar > label,
+  .record-toolbar > button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .record-toolbar > label {
+    justify-content: space-between;
+  }
+
+  .record-toolbar > label input,
+  .record-toolbar > label select {
+    flex: 1;
+    max-width: 65%;
+  }
+
+  .record-count {
+    width: 100%;
+  }
+
+  .modal-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-fields label:has(textarea) {
+    grid-column: auto;
+  }
+
+  .modal-actions {
+    position: sticky;
+    bottom: -1px;
+    padding-top: 12px;
+    background: var(--panel);
+  }
+}
+
+@media (max-width: 460px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .crumb span,
+  .crumb-sep {
+    display: none;
+  }
+
+  .top-actions {
+    gap: 7px;
+  }
+
+  .panel-title {
+    gap: 12px;
+    flex-direction: column;
+  }
+
+  .panel-title > .primary-btn,
+  .panel-title > .status {
+    align-self: stretch;
+  }
+
+  .table-scroll table {
+    min-width: 620px;
+  }
+}
