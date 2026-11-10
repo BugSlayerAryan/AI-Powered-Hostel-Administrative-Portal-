@@ -1,7 +1,42 @@
-import 'dotenv/config';import express from 'express';import cors from 'cors';import helmet from 'helmet';import rateLimit from 'express-rate-limit';import morgan from 'morgan';import path from 'node:path';import {fileURLToPath} from 'node:url';import fs from 'node:fs';import multer from 'multer';import {connectDatabase} from './config/database.js';import authRoutes from './routes/auth.js';import resourceRoutes from './routes/resources.js';import aiRoutes from './routes/ai.js';import {authenticate,AuthedRequest} from './middleware/auth.js';import {Resource} from './models/index.js';
-const __dirname=path.dirname(fileURLToPath(import.meta.url));const app=express();app.use(helmet());app.use(cors({origin:process.env.CLIENT_ORIGIN,credentials:true}));app.use(express.json({limit:'1mb'}));app.use(morgan('tiny'));app.get('/api/health',(_req,res)=>res.json({ok:true,service:'hostel-portal',database:Resource.db.readyState===1?'connected':'connecting'}));app.use('/api/auth',rateLimit({windowMs:15*60*1000,limit:100}),authRoutes);app.use('/api/ai',rateLimit({windowMs:60*1000,limit:30}),aiRoutes);app.use('/api',resourceRoutes);
+import 'dotenv/config';
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import morgan from 'morgan';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import fs from 'node:fs';
+import multer from 'multer';
+import { connectDatabase } from './config/database.js';
+import authRoutes from './routes/auth.js';
+import resourceRoutes from './routes/resources.js';
+import aiRoutes from './routes/ai.js';
+import { authenticate, AuthedRequest } from './middleware/auth.js';
+import { Resource } from './models/index.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const app = express();
+
+app.use(helmet());
+app.use(cors({ origin: '*' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(morgan('tiny'));
+app.get('/api/health', (_req, res) =>
+  res.json({
+    ok: true,
+    service: 'hostel-portal',
+    database: Resource.db.readyState === 1 ? 'connected' : 'connecting',
+  }),
+);
+app.use(
+  '/api/auth',
+  rateLimit({ windowMs: 15 * 60 * 1000, limit: 100 }),
+  authRoutes,
+);
+app.use('/api/ai', rateLimit({ windowMs: 60 * 1000, limit: 30 }), aiRoutes);
+app.use('/api', resourceRoutes);
 const upload=multer({storage:multer.diskStorage({destination:(req,_file,cb)=>{const folder=String(req.query.type||'complaints');const allowed=['profiles','complaints','documents','receipts'];const dir=path.resolve(__dirname,'../uploads',allowed.includes(folder)?folder:'complaints');fs.mkdirSync(dir,{recursive:true});cb(null,dir)},filename:(_req,file,cb)=>cb(null,`${Date.now()}-${crypto.randomUUID()}${path.extname(file.originalname).toLowerCase()}`)}),limits:{fileSize:5*1024*1024},fileFilter:(_req,file,cb)=>{const ok=['image/jpeg','image/png','image/webp','application/pdf'].includes(file.mimetype);cb(ok?null as any:new Error('Only JPG, PNG, WebP, and PDF files are accepted'),ok)}});
 app.post('/api/uploads',authenticate,upload.single('file'),async(req:AuthedRequest,res)=>{if(!req.file)return res.status(400).json({message:'Choose a file'});const doc=await Resource.create({kind:'uploads',student:req.user.role==='STUDENT'?req.user._id:undefined,hostel:req.user.hostel,filename:req.file.filename,mimeType:req.file.mimetype,filePath:req.file.path,actor:req.user._id});res.status(201).json({id:doc.id,filename:doc.filename})});app.get('/api/uploads/:id',authenticate,async(req:AuthedRequest,res)=>{const d:any=await Resource.findOne({_id:req.params.id,kind:'uploads',...(req.user.role==='SUPER_ADMIN'?{}:{hostel:req.user.hostel})});if(!d)return res.status(404).end();if(req.user.role==='STUDENT'&&String(d.student)!==String(req.user._id))return res.status(403).end();res.type(d.mimeType);res.sendFile(path.resolve(d.filePath))});
 app.use((error:any,_req:express.Request,res:express.Response,_next:express.NextFunction)=>res.status(error.status||500).json({message:error.message||'Unexpected server error'}));
 const port=Number(process.env.PORT||5000);await connectDatabase(process.env.MONGODB_URI!);const server=app.listen(port,()=>console.info(`API server listening on port ${port}.`));for(const signal of ['SIGINT','SIGTERM'] as const)process.on(signal,()=>server.close(()=>{void Resource.db.close().finally(()=>process.exit(0))}));
-
